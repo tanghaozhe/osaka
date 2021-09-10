@@ -2,13 +2,11 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.utils.data
-
-
+from configure import *
 
 class MolecularVAE(nn.Module):
     def __init__(self):
         super(MolecularVAE, self).__init__()
-
         self.conv_1 = nn.Conv1d(120, 9, kernel_size=9)
         self.conv_2 = nn.Conv1d(9, 9, kernel_size=9)
         self.conv_3 = nn.Conv1d(9, 10, kernel_size=11)

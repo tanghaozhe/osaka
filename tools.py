@@ -34,6 +34,6 @@ def load_dataset(filename, split = True):
         return (data_test, charset)
 
 def vae_loss(x_decoded_mean, x, z_mean, z_logvar):
-    xent_loss = F.binary_cross_entropy(x_decoded_mean, x)
+    xent_loss = F.binary_cross_entropy(x_decoded_mean, x, reduction="sum")
     kl_loss = -0.5 * torch.sum(1 + z_logvar - z_mean.pow(2) - z_logvar.exp())
     return xent_loss + kl_loss

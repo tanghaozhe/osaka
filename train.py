@@ -9,12 +9,12 @@ import os
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 def train():
-    initial_checkpoint = None
+    initial_checkpoint = None #"./result/checkpoint/00014000_model.pth"
     out_dir = "./result"
     for f in ['checkpoint']:
         os.makedirs(out_dir + '/' + f, exist_ok=True)
-    num_iteration = 10000 * 1000
-    iter_save = list(range(0, num_iteration, 1000))
+    num_iteration = 1000 * 1000
+    iter_save = list(range(0, num_iteration, 500))
     log = Logger()
     log.open(out_dir + '/log.train.txt', mode='a')
 
@@ -32,35 +32,30 @@ def train():
 
     log.write('** start training here! **\n')
     log.write('   experiment = %s\n' % str(__file__.split('/')[-2:]))
-    log.write('iter   epoch | loss  |\n')
+    log.write('iter  | epoch | loss  \n')
     log.write('----------------------\n')
-    #          0.00* 0.00  | 0.000  |
+    #               0  0.00  | 0.000
 
     optimizer = optim.Adam(net.parameters())
 
     def message(mode='print'):
         if mode == ('print'):
             asterisk = ' '
-            loss = batch_loss
         if mode == ('log'):
             asterisk = '*' if iteration in iter_save else ' '
-            loss = train_loss
 
         text = \
-            '%5.4f%s %4.2f  | ' % (iteration / 10000, asterisk, epoch,) + \
-            '%4.3f  ' % (loss)
+            '%5d %s %4.2f  | ' % (iteration, asterisk, epoch,) + \
+            '%4.3f  ' % (sum_train_loss / sum_train)
 
         return text
-
-    train_loss = 0
-    batch_loss = 0
-    sum_train_loss = 0
-    sum_train = 0
 
     iteration = start_iteration
     epoch = start_epoch
     net.train()
     while iteration < num_iteration:
+        sum_train_loss = 0
+        sum_train = 0
         for t, batch in enumerate(train_loader):
             if iteration in iter_save:
                 if iteration != start_iteration:
@@ -75,6 +70,15 @@ def train():
             batch = batch[0].to(device)
             optimizer.zero_grad()
             output, mean, logvar = net(batch)
+            # if t == 0:
+            #     inp = batch.cpu().numpy()
+            #     outp = output.cpu().detach().numpy()
+            #     lab = batch.cpu().numpy()
+            #     print("Input:")
+            #     print(decode_smiles_from_indexes(map(from_one_hot_array, inp[0]), charset))
+            #     sampled = outp[0].reshape(1, 120, len(charset)).argmax(axis=2)[0]
+            #     print("Output:")
+            #     print(decode_smiles_from_indexes(sampled, charset))
 
             loss = vae_loss(output, batch, mean, logvar)
             loss.backward()
@@ -86,18 +90,8 @@ def train():
             batch_loss = loss.item()
             sum_train_loss += batch_loss
             sum_train += batch_size
-            if iteration % 100 == 0:
-                # print('\r', end='', flush=True)
-                # log.write(message(mode='log') + '\n')
-                train_loss = sum_train_loss / (sum_train + 1e-12)
-                sum_train_loss = 0
-                sum_train = 0
-            print('\r', end='', flush=True)
-            print(message(mode='print'), end='', flush=True)
-
-
-    # log.write('\n')
-
+        print('\r', end='', flush=True)
+        log.write(message(mode='log') + '\n')
 
 data_train, data_test, charset = load_dataset('./data/processed.h5')
 charset = list(map(lambda x: x.decode("utf-8"), charset))
