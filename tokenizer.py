@@ -1,5 +1,7 @@
 import re
 import pandas as pd
+from configure import *
+import pickle
 
 # https://arxiv.org/pdf/1711.04810.pdf
 class Tokenizer(object):
@@ -69,7 +71,8 @@ class Tokenizer(object):
         return captions
 
 if __name__ == '__main__':
-    data = pd.read_csv("./data/chembl_500k_train.csv")
+    data_train = pd.read_csv(train_data_dir)
     tokenizer = Tokenizer()
-    tokenizer.fit_on_texts(data["SMILES"].tolist())
-    tokenizer.text_to_sequence("Cc1cc(ccc1C(=O)c2ccccc2Cl)N3N=CC(=O)NC3=O")
+    tokenizer.fit_on_texts(data_train["SMILES"])
+    with open('tokenizer.pkl', 'wb') as f:
+        pickle.dump(tokenizer, f)

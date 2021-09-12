@@ -6,11 +6,6 @@ import numpy as np
 from matplotlib import colors
 from rdkit.Chem.Draw import MolToImage
 
-def one_hot_array(i, n):
-    return map(int, [ix == i for ix in xrange(n)])
-
-def one_hot_index(vec, charset):
-    return map(charset.index, vec)
 
 def from_one_hot_array(vec):
     oh = np.where(vec == 1)
@@ -18,8 +13,26 @@ def from_one_hot_array(vec):
         return None
     return int(oh[0][0])
 
+
+def make_one_hot(data, tokenizer, max_len=120):
+    """Converts the Strings to onehot data"""
+    vocab = tokenizer.stoi
+    data_one_hot = np.zeros((len(data), max_len, len(vocab)))
+    for i, smiles in enumerate(data):
+        smiles = tokenizer.text_to_sequence(smiles)
+        smiles = smiles[:max_len] + [0] * (max_len - len(smiles))
+
+        for j, sequence in enumerate(smiles):
+            if sequence is not vocab['<UNK>']:
+                data_one_hot[i, j, sequence] = 1
+            else:
+                data_one_hot[i, j, vocab['<UNK>']] = 1
+    return data_one_hot
+
+
 def decode_smiles_from_indexes(vec, charset):
     return "".join(map(lambda x: charset[x], vec)).strip()
+
 
 def load_dataset(filename, split = True):
     h5f = h5py.File(filename, 'r')
@@ -34,6 +47,7 @@ def load_dataset(filename, split = True):
         return (data_train, data_test, charset)
     else:
         return (data_test, charset)
+
 
 def vae_loss(x_decoded_mean, x, z_mean, z_logvar):
     xent_loss = F.binary_cross_entropy(x_decoded_mean, x, reduction="sum")

@@ -2,21 +2,23 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.utils.data
+import math
 from configure import *
 
-class MolecularVAE(nn.Module):
+class VAE(nn.Module):
     def __init__(self):
-        super(MolecularVAE, self).__init__()
+        super(VAE, self).__init__()
+        receptive_field = math.ceil(vocab_len - 9 + 1 - 9 + 1 - 11 + 1)
         self.conv_1 = nn.Conv1d(120, 9, kernel_size=9)
         self.conv_2 = nn.Conv1d(9, 9, kernel_size=9)
         self.conv_3 = nn.Conv1d(9, 10, kernel_size=11)
-        self.linear_0 = nn.Linear(70, 435)
+        self.linear_0 = nn.Linear(receptive_field * 10, 435)
         self.linear_1 = nn.Linear(435, 292)
         self.linear_2 = nn.Linear(435, 292)
 
         self.linear_3 = nn.Linear(292, 292)
         self.gru = nn.GRU(292, 501, 3, batch_first=True)
-        self.linear_4 = nn.Linear(501, 33)
+        self.linear_4 = nn.Linear(501, vocab_len)
 
         self.relu = nn.ReLU()
         self.softmax = nn.Softmax()
