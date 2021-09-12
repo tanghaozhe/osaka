@@ -1,8 +1,5 @@
 
-## Molecule Generation
-
-implementation of the paper [**Automatic Chemical Design Using a Data-Driven Continuous Representation of Molecules**](https://pubs.acs.org/doi/10.1021/acscentsci.7b00572)
-
+# Molecule Generation
 
 ## Directory structure
 - `tokenizer`: tokenize SMILES from a dataset
