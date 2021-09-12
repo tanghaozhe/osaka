@@ -3,6 +3,8 @@ import torch.nn.functional as F
 import torch.utils.data
 import h5py
 import numpy as np
+from matplotlib import colors
+from rdkit.Chem.Draw import MolToImage
 
 def one_hot_array(i, n):
     return map(int, [ix == i for ix in xrange(n)])
@@ -37,3 +39,16 @@ def vae_loss(x_decoded_mean, x, z_mean, z_logvar):
     xent_loss = F.binary_cross_entropy(x_decoded_mean, x, reduction="sum")
     kl_loss = -0.5 * torch.sum(1 + z_logvar - z_mean.pow(2) - z_logvar.exp())
     return xent_loss + kl_loss
+
+
+def get_image(mol, atomset, name):
+    """Save image of the SMILES for vis purposes"""
+    hcolor = colors.to_rgb('green')
+    if atomset is not None:
+        # highlight the atoms set while drawing the whole molecule.
+        img = MolToImage(mol, size=(600, 600), fitImage=True, highlightAtoms=atomset, highlightColor=hcolor)
+    else:
+        img = MolToImage(mol, size=(400, 400), fitImage=True)
+
+    img = img.save(name + ".jpg")
+    return img
