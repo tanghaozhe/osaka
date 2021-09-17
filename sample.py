@@ -16,7 +16,7 @@ net.load_state_dict(state_dict, strict=True)
 data_train = pd.read_csv(train_data_dir)
 with open('tokenizer.pkl', 'rb') as f:
     tokenizer = pickle.load(f)
-data_train = make_one_hot(data_train["SMILES"], tokenizer).astype(np.float32)
+data_train = tokenizer.make_one_hot(data_train["SMILES"]).astype(np.float32)
 data_train = torch.utils.data.TensorDataset(torch.from_numpy(data_train))
 train_loader = torch.utils.data.DataLoader(data_train, batch_size=1, shuffle=True)
 

@@ -1,6 +1,7 @@
 import re
 import pandas as pd
 from configure import *
+import numpy as np
 import pickle
 
 # https://arxiv.org/pdf/1711.04810.pdf
@@ -17,6 +18,19 @@ class Tokenizer(object):
     def tokenizer(self, smiles_string):
         tokens = [token for token in self.regex.findall(smiles_string)]
         return tokens
+
+    def make_one_hot(self, data, max_len=120):
+        vocab = self.stoi
+        data_one_hot = np.zeros((len(data), max_len, len(vocab)))
+        for i, smiles in enumerate(data):
+            smiles = tokenizer.text_to_sequence(smiles)
+            smiles = smiles[:max_len] + [0] * (max_len - len(smiles))
+            for j, sequence in enumerate(smiles):
+                if sequence is not vocab['<UNK>']:
+                    data_one_hot[i, j, sequence] = 1
+                else:
+                    data_one_hot[i, j, vocab['<UNK>']] = 1
+        return data_one_hot
 
     def fit_on_texts(self, smiles):
         vocab_ = set()
@@ -38,22 +52,8 @@ class Tokenizer(object):
             sequence.append(self.stoi[s])
         return sequence
 
-    def texts_to_sequences(self, texts):
-        sequences = []
-        for text in texts:
-            sequence = self.text_to_sequence(text)
-            sequences.append(sequence)
-        return sequences
-
     def sequence_to_text(self, sequence):
         return ''.join(list(map(lambda i: self.itos[i], sequence)))
-
-    def sequences_to_texts(self, sequences):
-        texts = []
-        for sequence in sequences:
-            text = self.sequence_to_text(sequence)
-            texts.append(text)
-        return texts
 
     def predict_caption(self, sequence):
         caption = ''
@@ -63,12 +63,6 @@ class Tokenizer(object):
             caption += self.itos[i]
         return caption
 
-    def predict_captions(self, sequences):
-        captions = []
-        for sequence in sequences:
-            caption = self.predict_caption(sequence)
-            captions.append(caption)
-        return captions
 
 if __name__ == '__main__':
     data_train = pd.read_csv(train_data_dir)
