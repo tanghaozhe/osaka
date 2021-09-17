@@ -25,19 +25,3 @@ class Logger(object):
         # this handles the flush command by doing nothing.
         # you might want to specify some extra behavior here.
         pass
-
-def time_to_str(t, mode='min'):
-    if mode=='min':
-        t  = int(t)/60
-        hr = t//60
-        min = t%60
-        return '%2d hr %02d min'%(hr,min)
-
-    elif mode=='sec':
-        t   = int(t)
-        min = t//60
-        sec = t%60
-        return '%2d min %02d sec'%(min,sec)
-
-    else:
-        raise NotImplementedError

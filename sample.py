@@ -8,7 +8,7 @@ from configure import *
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 net = VAE().to(device)
-initial_checkpoint = './result/checkpoint/00012000_model.pth'
+initial_checkpoint = './result/checkpoint/0100_model.pth'
 f = torch.load(initial_checkpoint, map_location=lambda storage, loc: storage)
 state_dict = f['state_dict']
 net.load_state_dict(state_dict, strict=True)
@@ -26,11 +26,11 @@ for t, batch in enumerate(train_loader):
     batch = batch[0].to(device)
     output, mean, logvar = net(batch)
     inp = batch.cpu().numpy()
-    print("input:", decode_smiles_from_indexes(map(from_one_hot_array, inp[0]), tokenizer.itos))
+    print('input:', tokenizer.predict_caption(map(from_one_hot_array, inp[0])))
     outp = output.cpu().detach().numpy()
     sampled = outp[0].reshape(1, 120, len(tokenizer.itos)).argmax(axis=2)[0]
-    print("output:", decode_smiles_from_indexes(sampled, tokenizer.itos))
     smi = tokenizer.predict_caption(sampled)
+    print("output:", smi)
     # smi = decode_smiles_from_indexes(sampled, tokenizer.itos)
     # m = Chem.MolFromSmiles(smi, sanitize=False)
     # if m is not None:

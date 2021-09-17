@@ -36,22 +36,16 @@ def train():
 
     log.write('** start training here! **\n')
     log.write('   experiment = %s\n' % str(__file__.split('/')[-2:]))
-    log.write('iter  | epoch | loss  \n')
+    log.write('iter   | epoch | loss  \n')
     log.write('-----------------------\n')
-    #               0  0.00  | 0.000
+    #          000000 | 0000  | 0.000
 
     optimizer = optim.Adam(net.parameters())
 
-    def message(mode='print'):
-        if mode == ('print'):
-            asterisk = ' '
-        if mode == ('log'):
-            asterisk = '*' if iteration in iter_save else ' '
-
+    def message():
         text = \
-            '%5d %s %4.2f  | ' % (iteration, asterisk, epoch,) + \
-            '%4.3f  ' % (sum_train_loss / sum_train)
-
+            '%06d | %04d  | ' % (iteration, epoch,) + \
+            '%4.2f  ' % (sum_train_loss / sum_train)
         return text
 
     iteration = start_iteration
@@ -61,15 +55,6 @@ def train():
         sum_train_loss = 0
         sum_train = 0
         for t, batch in enumerate(train_loader):
-            if iteration in iter_save:
-                if iteration != start_iteration:
-                    torch.save({
-                        'state_dict': net.state_dict(),
-                        'iteration': iteration,
-                        'epoch': epoch,
-                    }, out_dir + '/checkpoint/%08d_model.pth' % (iteration))
-                    pass
-
             batch_size = len(batch[0])
             batch = batch[0].to(device)
             optimizer.zero_grad()
@@ -77,15 +62,20 @@ def train():
             loss = vae_loss(output, batch, mean, logvar)
             loss.backward()
             optimizer.step()
-
-            epoch += 1 / len(train_loader)
             iteration += 1
-
             batch_loss = loss.item()
             sum_train_loss += batch_loss
             sum_train += batch_size
+
+        epoch += 1
+        torch.save({
+            'state_dict': net.state_dict(),
+            'iteration': iteration,
+            'epoch': epoch,
+        }, out_dir + '/checkpoint/%04d_model.pth' % (epoch))
+
         print('\r', end='', flush=True)
-        log.write(message(mode='log') + '\n')
+        log.write(message() + '\n')
 
 
 torch.manual_seed(42)

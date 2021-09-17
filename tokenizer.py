@@ -23,7 +23,7 @@ class Tokenizer(object):
         vocab = self.stoi
         data_one_hot = np.zeros((len(data), max_len, len(vocab)))
         for i, smiles in enumerate(data):
-            smiles = tokenizer.text_to_sequence(smiles)
+            smiles = self.text_to_sequence(smiles)
             smiles = smiles[:max_len] + [0] * (max_len - len(smiles))
             for j, sequence in enumerate(smiles):
                 if sequence is not vocab['<UNK>']:
