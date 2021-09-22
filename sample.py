@@ -47,7 +47,7 @@ for t, batch in enumerate(train_loader):
         # check if the generated molecule is chemically reasonable
         m = Chem.MolFromSmiles(smi, sanitize=True)
 
-        if m:
+        if m and radical_group_num_check(m) and custom_patt_check(m):
             mol_calc = MolCalculation()
             result = [smi]
             for key in calc_list:
@@ -58,6 +58,6 @@ for t, batch in enumerate(train_loader):
     if len(results) >= max_num_mol:
         break
 
-results = pd.DataFrame(results, columns=['smiles']+calc_list)
+results = pd.DataFrame(results, columns=['smiles']+calc_list).round(2)
 print(results)
 results.to_csv('./result/result.csv')

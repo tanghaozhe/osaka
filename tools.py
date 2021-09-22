@@ -6,7 +6,9 @@ from rdkit import rdBase, Chem
 import numpy as np
 from matplotlib import colors
 from rdkit.Chem.Draw import MolToImage
-from rdkit.Chem import Descriptors
+from rdkit.Chem import Descriptors, Fragments
+from configure import *
+
 
 class MolCalculation():
     def num_atoms(self, m):
@@ -25,10 +27,34 @@ class MolCalculation():
         return Descriptors.NumAromaticRings(m)
 
     def arom(self, m):
-        return Calc_AROM(m)
+        return calc_AROM(m)
 
 
-def Calc_AROM(mh):
+def radical_group_num_check(mol):
+    for key in radical_group_num_restraint:
+        func = 'Fragments.' + key
+        max_num = radical_group_num_restraint[key]
+        if 0 < max_num < eval(func)(mol):
+            return False
+    return True
+
+
+def custom_patt_check(mol):
+    for key in custom_pattern:
+        max_num = custom_pattern[key]
+        if max_num > 0:
+            smi_patt = custom_pattern[key]
+            total_num = 0
+            patt = Chem.MolFromSmarts(smi_patt)
+            if mol.HasSubstructMatch(patt):
+                hit_ats = mol.GetSubstructMatches(patt)
+                total_num += len(hit_ats)
+            if total_num > max_num:
+                return False
+    return True
+
+
+def calc_AROM(mh):
     m = Chem.RemoveHs(mh)
     ring_info = m.GetRingInfo()
     atoms_in_rings = ring_info.AtomRings()
@@ -42,6 +68,7 @@ def Calc_AROM(mh):
         if aromatic_atom_in_ring == len(ring):
             num_aromatic_ring += 1
     return num_aromatic_ring
+
 
 def from_one_hot_array(vec):
     oh = np.where(vec == 1)
