@@ -68,5 +68,7 @@ if __name__ == '__main__':
     data_train = pd.read_csv(train_data_dir)
     tokenizer = Tokenizer()
     tokenizer.fit_on_texts(data_train["SMILES"])
+    print("tokenizer:", len(tokenizer))
+    print(f"You must manually set len_vocab to {len(tokenizer)}.")
     with open('tokenizer.pkl', 'wb') as f:
         pickle.dump(tokenizer, f)

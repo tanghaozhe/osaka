@@ -13,14 +13,18 @@ mol_calc_setting = {
     'arom': False
 }
 
+# Limit the number of molecular fragments
 # To disable this parameter, set the value to minus one
 radical_group_num_restraint = {
     "fr_Al_COO": -1,  # Number of aliphatic carboxylic acids
     "fr_Ar_OH": -1,  # Number of aromatic hydroxyl groups
-    "fr_nitro": 0,  # Number of nitro groups
+    "fr_nitro": -1,  # Number of nitro groups
+    "fr_COO2": -1,  # Number of carboxylic acids
+    "fr_N_O": -1,  # Number of hydroxylamine groups
 }
+
 
 # You can set arbitrary pattern to filter undesirable SMILES
 custom_pattern = {
-    "OH": -1,
+    "S": 1,  # Limit the number of element S to less than 1
 }
